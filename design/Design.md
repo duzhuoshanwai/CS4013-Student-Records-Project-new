@@ -3,7 +3,7 @@
 ## List of classes
 
 - **Main** (to run the program)
-- **Department** (holds exam boards, calculates QCA...)
+- **Department** (holds exam boards logic like review progression and coordinates QCA calculation and progression)
 - **Student** (can view the transcript)
 - **Faculty** (can look up transcript and upload results to the module's result CSV)
 - **\<\<abstract\>\> Person** (Student and Faculty inherit from Person)
@@ -70,6 +70,14 @@
 | --- | --- |
 | A1: Add faculty for the specific module | Department |
 | A2: Progress student to next semester | Department (if the student’s progression status is “progress”), Student (contains implementation) |
+
+## Department ownership and validation rules
+
+- Department owns the canonical module catalogue. Programmes reference those same Module objects; a module may appear in multiple programmes. Student registration creates a private copy of the Programme and its Modules.
+- Registering a student requires the exact Student and Programme objects already held by Department. A Programme's Modules must be the exact Module objects in Department's catalogue.
+- A Module can be assigned to at most one Faculty. A Faculty may change modules only before grading any students.
+- Department delegates QCA and progression calculations to Student; it coordinates and exposes those operations.
+- CSV persistence stores module definitions separately from programme-module-semester links; loading resolves those links to the Department's canonical Module objects. Student copies and their grades are restored separately.
 
 ## Assumptions
 
