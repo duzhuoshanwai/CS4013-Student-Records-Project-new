@@ -115,7 +115,7 @@ public class CLI_Handler implements UserInterface{
                                 System.out.println("Programme not found.");
                                 continue;
                             }
-                            student.setProgramme(programme);
+                            department.registerStudent(student, programme);
                         } else if (Command2.equals("Q")) {
                             more2 = false;
                         } else {
