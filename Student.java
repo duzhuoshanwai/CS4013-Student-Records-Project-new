@@ -141,7 +141,7 @@ public class Student extends Person {
     }
 
     /**
-     * Calculates the credit-weighted QCA for the student's current semester.
+     * Calculates the average QCA for the student's current semester.
      *
      * @return the current semester QCA, or {@code 0.0} if there are no recorded
      *         quality grades in that semester
@@ -216,7 +216,7 @@ public class Student extends Person {
 
     private double calculateQCA(Integer semester) {
         double qualityPoints = 0.0;
-        int credits = 0;
+        int gradeCount = 0;
         if (programme == null) {
             return 0.0;
         }
@@ -227,11 +227,10 @@ public class Student extends Person {
                     || !isQualityGraded(grade)) {
                 continue;
             }
-            int credit = module.getCreditValue();
-            qualityPoints += getGradeQCA(grade) * credit;
-            credits += credit;
+            qualityPoints += getGradeQCA(grade);
+            gradeCount++;
         }
-        return credits == 0 ? 0.0 : qualityPoints / credits;
+        return gradeCount == 0 ? 0.0 : qualityPoints / gradeCount;
     }
 
     private boolean hasRecordedGrades() {

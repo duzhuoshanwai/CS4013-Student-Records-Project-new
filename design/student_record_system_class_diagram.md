@@ -81,6 +81,7 @@ classDiagram
     class Programme {
         -String code
         -String name
+        -Department department
         -ArrayList~Module~ modules
         -Map~String, Integer~ moduleSemesters
         +Programme(code, name)
@@ -119,15 +120,17 @@ classDiagram
     }
 
     class CSV_handler {
-        +read() void
-        +write() void
+        -Path dataDirectory
+        -Department department
+        +read(department) void
+        +write(department) void
         +update(student, module) void
     }
 
     class Storable {
         <<interface>>
-        +read() void
-        +write() void
+        +read(department) void
+        +write(department) void
         +update(student, module) void
     }
 
@@ -141,6 +144,7 @@ classDiagram
 
     %% Dependencies
     Main --> Department
+    Main ..> CSV_handler : loads and saves Department state
     Main ..> UserInterface : uses
     Faculty ..> Storable : writes module result CSV
 
@@ -166,7 +170,10 @@ Each `Student` owns a copy of their `Programme`, which owns copies of its `Modul
 
 `Student[Programme[Module1[Grade?], Module2[Grade?], ...]]`
 
-- `CSV_handler` stores the shared programme/module catalogue as templates.
+- `Department` owns the shared programme/module catalog in memory.
+- `CSV_handler` loads records into an empty Department and persists the current
+  Department state; it may keep a reference to that Department for immediate
+  grade updates, but does not keep a second copy of the entity collections.
 - `Student.registerOnProgram(programme)` copies the programme, its module-semester mapping, and its modules. A copied module starts with a null grade; an explicit `NG` is a recorded grade.
 - `Faculty.setResult(student, grade)` checks that the student's programme contains the taught module, then records the grade on that student's module copy.
 - The module result CSV stores one current grade per student and module; there is no result ID, attempt history, or result-specific semester.

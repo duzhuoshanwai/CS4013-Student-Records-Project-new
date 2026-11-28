@@ -7,6 +7,7 @@ public class Programme {
     private String name;
     private ArrayList<Module> modules;
     private Map<String, Integer> moduleSemesters;
+    private Department department;
 
     public Programme(String name) {
         this(name, name);
@@ -27,6 +28,10 @@ public class Programme {
         if (module == null || module.getCode() == null) {
             throw new IllegalArgumentException("Module and module code are required.");
         }
+        if (department != null && department.findModule(module.getCode()) != module) {
+            throw new IllegalArgumentException(
+                    "Module is not registered with this programme's department.");
+        }
         if (semester < 1) {
             throw new IllegalArgumentException("Semester must be positive.");
         }
@@ -38,6 +43,17 @@ public class Programme {
         }
         modules.add(module);
         moduleSemesters.put(module.getCode(), semester);
+    }
+
+    void attachToDepartment(Department department) {
+        if (department == null) {
+            throw new IllegalArgumentException("Department cannot be null.");
+        }
+        if (this.department != null && this.department != department) {
+            throw new IllegalArgumentException(
+                    "Programme is already registered with another department.");
+        }
+        this.department = department;
     }
 
     public String getCode() {
