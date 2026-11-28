@@ -101,6 +101,14 @@ public class Student extends Person {
     }
 
     /**
+     * Assigns a programme to a student
+     * @param programme the programme the student is being assigned to
+     */
+    public void setProgramme(Programme programme) {
+        this.programme = programme;
+    }
+
+    /**
      * Gets the modules assigned to a course semester.
      *
      * @param semester the globally numbered course semester
