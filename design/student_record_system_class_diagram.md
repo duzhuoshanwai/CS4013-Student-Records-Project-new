@@ -10,19 +10,30 @@ classDiagram
 
     class Department {
         -ArrayList~Student~ students
-        -ArrayList~Faculty~ professors
-        -ArrayList~Program~ programs
+        -ArrayList~Faculty~ faculties
+        -ArrayList~Programme~ programmes
         -ArrayList~Module~ modules
         +Department()
-        +addStudent(student) void
-        +addFaculty(faculty, module) void
-        +addProgram(program) void
-        +addModule(module) void
-        +register(student, program) void
-        +calculateSemesterQCA(student) void
-        +calculateOverallQCA(student) void
-        +identifyProgressionStatus(student) void
-        +progress(student) void
+        +getStudents() ArrayList~Student~
+        +getFaculties() ArrayList~Faculty~
+        +getProgrammes() ArrayList~Programme~
+        +getModules() ArrayList~Module~
+        +findStudent(id: String) Student
+        +findFaculty(id: String) Faculty
+        +findProgramme(code: String) Programme
+        +findModule(code: String) Module
+        +findFacultyForModule(moduleCode: String) Faculty
+        +addStudent(student: Student) void
+        +addFaculty(faculty: Faculty) void
+        +addFaculty(faculty: Faculty, module: Module) void
+        +assignFacultyToModule(faculty: Faculty, module: Module) void
+        +addProgramme(programme: Programme) void
+        +addModule(module: Module) void
+        +registerStudent(student: Student, programme: Programme) void
+        +calculateSemesterQCA(student: Student) double
+        +calculateOverallQCA(student: Student) double
+        +identifyProgressionStatus(student: Student) String
+        +progress(student: Student) void
     }
 
     class Person {
@@ -133,19 +144,20 @@ classDiagram
     Main ..> UserInterface : uses
     Faculty ..> Storable : writes module result CSV
 
-    %% Department holds (aggregation)
-    Department "1" o--> Faculty
-    Department "1" o--> Student
-    Department "1" o--> Programme
-    Department "1" o--> Module
+    %% Department holds the canonical objects
+    Department "1" o--> "0..*" Faculty
+    Department "1" o--> "0..*" Student
+    Department "1" o--> "0..*" Programme
+    Department "1" o--> "0..*" Module
 
     %% Faculty
-    Faculty "1" o--> Module
+    Faculty "0..1" --> "0..1" Module : assigned
     Faculty "0..*" -- "0..*" Student : grades
 
-    %% Each student owns a programme/module copy with its recorded grades.
-    Student "1" *--> Programme
-    Programme "1" *--> Module
+    %% Student registration copies the Programme and its Modules.
+    Student "1" *--> "0..1" Programme
+    %% Catalogue Programmes reference Department's canonical Module objects.
+    Programme "0..*" --> "0..*" Module : references
 ```
 
 ## Container model
@@ -160,10 +172,12 @@ Each `Student` owns a copy of their `Programme`, which owns copies of its `Modul
 - The module result CSV stores one current grade per student and module; there is no result ID, attempt history, or result-specific semester.
 - Semester numbers increase across the whole course. `calculateSemesterQCA()` uses `currentSemester` and the copied programme's module-semester mapping; `generateTranscript()` lists recorded grades with their curriculum semesters.
 - Handbook `NG` has 0.00 QPV and is included in QCA; ungraded null grades are excluded. Pass/fail `P` and `N` are non-quality grades.
+- `Department.identifyProgressionStatus(student)` sets the student's status to `PROGRESS` when their overall QCA is at least 2.00, and to `REPEAT` otherwise.
+- `Department.progress(student)` advances the student to the next semester only when their progression status is `PROGRESS`.
 
 ## Relationship summary
 
-| From | Relationship | To | Multiplicity (at source) |
+| From | Relationship | To | Multiplicity |
 |---|---|---|---|
 | Student | Inheritance (extends) | Person | – |
 | Faculty | Inheritance (extends) | Person | – |
@@ -172,11 +186,11 @@ Each `Student` owns a copy of their `Programme`, which owns copies of its `Modul
 | Main | Association (uses) | Department | – |
 | Main | Dependency (uses) | CLI_class | – |
 | Faculty | Dependency (uses) | Storable | – |
-| Department | Aggregation | Faculty | 1 |
-| Department | Aggregation | Student | 1 |
-| Department | Aggregation | Programme | 1 |
-| Department | Aggregation | Module | 1 |
-| Faculty | Aggregation | Module | 1 |
-| Faculty | Association | Student | 0..* |
-| Student | Composition | Programme | 1 |
-| Programme | Composition | Module | 1 |
+| Department | Aggregation | Faculty | 1 Department to 0..* Faculty |
+| Department | Aggregation | Student | 1 Department to 0..* Student |
+| Department | Aggregation | Programme | 1 Department to 0..* Programme |
+| Department | Aggregation | Module | 1 Department to 0..* Module |
+| Faculty | Association | Module | 0..1 per Faculty; at most 1 Faculty per Module |
+| Faculty | Association | Student | 0..* per Faculty |
+| Student | Composition | Programme copy | 0..1 per Student |
+| Programme | Association (references catalogue modules) | Module | 0..* per Programme; modules may be shared |
