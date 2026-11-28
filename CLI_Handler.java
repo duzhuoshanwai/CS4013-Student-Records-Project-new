@@ -1,6 +1,9 @@
 import java.util.Scanner;
 import java.io.IOException;
 
+/**
+ * Handles the command line interface for the student transcript system.
+ */
 public class CLI_Handler implements UserInterface{
     private Scanner scan;
 
@@ -15,6 +18,7 @@ public class CLI_Handler implements UserInterface{
     /**
      * Runs student transcript system
      * @param department the department obj
+     * @throws IOException if an IO error occurs
      */
     @Override
     public void run(Department department) throws IOException 
@@ -37,12 +41,11 @@ public class CLI_Handler implements UserInterface{
                     System.out.println("Enter facultyID:");
                     String facultyId = scan.nextLine();
                     Faculty faculty = department.getFacultyById(facultyId); //need to add this in same way as student
-                    if (faculty != null) {
-                        System.out.println(faculty.generateTranscript());
-                    } else {
+                    if (faculty == null) {
                         System.out.println("FacultyID not found.");
                         continue;
                     }
+                
                     Module module = faculty.getModule();
                     if (module == null) {
                         System.out.println("Module not found.");
@@ -75,7 +78,8 @@ public class CLI_Handler implements UserInterface{
                     boolean more2 = true;
 
                     while (more2) {
-                        System.out.println("Add S)tudent or Add P)rogramme or Q)uit");
+                        System.out.println("S) Add Student, P)Add Programme, M)Add Module, ");
+                        System.out.println(" SP) Register Student to Programme, Q) Quit");
                         String Command2 = scan.nextLine().toUpperCase();
 
                         if (Command2.equals("S")) {
@@ -92,6 +96,26 @@ public class CLI_Handler implements UserInterface{
                             String progName = scan.nextLine();
                             Programme programmeAdd = new Programme(progCode, progName);
                             department.addProgramme(programmeAdd);
+                        } else if (Command2.equals("M")) {
+                            System.out.println("Enter module code:");
+                            String moduleCode = scan.nextLine();
+                            System.out.println("Enter module name:");
+                            String moduleName = scan.nextLine();
+                            Module moduleAdd = new Module(moduleCode, moduleName);
+                            department.addModule(moduleAdd);
+                        } else if (Command2.equals("SP")) {
+                            Student student = chooseStudent(department);
+                            if (student == null) {
+                                continue;
+                            }
+                            System.out.println("Enter programme code:");
+                            String progCode = scan.nextLine();
+                            Programme programme = department.getProgrammeByCode(progCode); // another one to make in department
+                            if (programme == null) {
+                                System.out.println("Programme not found.");
+                                continue;
+                            }
+                            student.setProgramme(programme);
                         } else if (Command2.equals("Q")) {
                             more2 = false;
                         } else {
