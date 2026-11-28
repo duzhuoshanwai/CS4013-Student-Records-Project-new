@@ -30,6 +30,9 @@ public class Department {
         if (source == null || source == this || !isEmpty()) {
             throw new IllegalArgumentException("Loaded state cannot be transferred.");
         }
+        for (Programme programme : source.programmes) {
+            programme.transferToDepartment(source, this);
+        }
         students.addAll(source.students);
         faculties.addAll(source.faculties);
         programmes.addAll(source.programmes);

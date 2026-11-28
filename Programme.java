@@ -56,6 +56,13 @@ public class Programme {
         this.department = department;
     }
 
+    void transferToDepartment(Department source, Department target) {
+        if (source == null || target == null || source == target || department != source) {
+            throw new IllegalArgumentException("Programme department cannot be transferred.");
+        }
+        department = target;
+    }
+
     public String getCode() {
         return code;
     }
